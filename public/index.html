@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang='en' dir='ltr'>
+	<head>
+		<meta charset='utf-8'>
+		<meta name='viewport' content='width=device-width, initial-scale=1'>
+
+		<title>Tanklash</title>
+
+		<link rel='icon' type='image/svg+xml' href='art/tankFavicon.svg'>
+		<link rel='stylesheet' type='text/css' href='style.css'>
+	</head>
+	<body>
+		<div id='playerConfig' class='hidden'>
+			<input id='editPlayerName' oninput='savePlayerName(event.target.value)' placeholder='PLAYER' class='allCaps' autocomplete='off' maxlength='12'></input>
+			<button id='editPlayerColor' onclick='savePlayerColor(event.target.className)'></button>
+		</div>
+
+		<div id='startScreen' class='fullscreen centerBoth'>
+			<div class='center'>
+				<h1>Tanklash</h1>
+				<button id='editPlayerColorBig' onclick='savePlayerColor(event.target.className)'></button>
+				<p class='hint'>Press W, A, S, or D</p>
+			</div>
+		</div>
+
+		<div id='hostOrJoinScreen' class='fullscreen centerBoth hidden'>
+			<div class='center'>
+				<button id='host' class='noBox' onkeyup='navigateHostOrJoin(event.key, event.target.id)' onclick=changeScreen("hostScreen")>Host</button>
+				<button id='join' class='noBox' onkeyup='navigateHostOrJoin(event.key, event.target.id)' onclick=changeScreen("joinScreen")>Join</button>
+				<p class='hint'>
+					WASD to move<br>
+					Mouse to aim<br>
+					Left click to fire<br>
+					Right click for special
+				</p>
+			</div>
+		</div>
+
+		<div id='hostScreen' class='fullscreen centerBoth hidden'>
+			<div class='center relative'>
+				<button id='start' onclick='requestStart()' class='hidden'>Start</button>
+				<button id='hostBack' class='noBox back' onclick='changeScreen("hostOrJoinScreen")'>&lt;</button>
+				<input id='hostCode' class='allCaps' onclick='copyCode()' readonly></input>
+				<span id='hostCodeCopied'>Copied</span>
+				<p class='faded'>Hosting</p>
+				<div class='staticPlayers'></div>
+			</div>
+		</div>
+
+		<div id='joinScreen' class='fullscreen centerBoth hidden'>
+			<div class='center relative'>
+				<button id='navigateBack' class='noBox back' onclick='changeScreen("hostOrJoinScreen")'>&lt;</button>
+				<input id='joinCode' placeholder='CODE' oninput='joinCodeChanged(event.target.value)' class='allCaps' autocomplete='off'></input>
+				<p class='faded'>Joining</p>
+				<div class='staticPlayers'></div>
+			</div>
+		</div>
+
+		<div id='mapScreen' class='fullscreen centerBoth hidden'>
+			<div class='aCenterBig center'>
+				<h1>
+					Map
+				</h1>
+				<div id='maps'>
+					<div class='mapContainer'>
+						<div class='map'>
+							<div id='desert1votes' class='votes'></div>
+							<button id='desert1' class='mapButton desert' onclick='requestMapVote(event.target.id)'><table></table></button>
+							<span>Desert 1</span>
+						</div>
+					</div>
+					<div class='mapContainer'>
+						<div class='map'>
+							<div id='desert2votes' class='votes'></div>
+							<button id='desert2' class='mapButton desert' onclick='requestMapVote(event.target.id)'><table></table></button>
+							<span>Desert 2</span>
+						</div>
+					</div>
+					<div class='mapContainer'>
+						<div class='map'>
+							<div id='desert3votes' class='votes'></div>
+							<button id='desert3' class='mapButton desert' onclick='requestMapVote(event.target.id)'><table></table></button>
+							<span>Desert 3</span>
+						</div>
+					</div>
+					<div class='mapContainer'>
+						<div class='map'>
+							<div id='jungle1votes' class='votes'></div>
+							<button id='jungle1' class='mapButton jungle' onclick='requestMapVote(event.target.id)'><table></table></button>
+							<span>Jungle 1</span>
+						</div>
+					</div>
+					<div class='mapContainer'>
+						<div class='map'>
+							<div id='jungle2votes' class='votes'></div>
+							<button id='jungle2' class='mapButton jungle' onclick='requestMapVote(event.target.id)'><table></table></button>
+							<span>Jungle 2</span>
+						</div>
+					</div>
+					<div class='mapContainer'>
+						<div class='map'>
+							<div id='jungle3votes' class='votes'></div>
+							<button id='jungle3' class='mapButton jungle' onclick='requestMapVote(event.target.id)'><table></table></button>
+							<span>Jungle 3</span>
+						</div>
+					</div>
+				</div>
+				<div id='noVotes'></div>
+			</div>
+		</div>
+
+		<div id='gameScreen' class='fullscreen centerBoth hidden'>
+			<div class='center relative'>
+				<h1 id='winner' class='allCaps'></h1>
+				<div id='world'></div>
+				<table>
+					<tbody id='map'></tbody>
+				</table>
+			</div>
+		</div>
+		<script src='app.js'></script>
+	</body>
+</html>
