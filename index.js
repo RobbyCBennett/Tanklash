@@ -39,8 +39,8 @@ var maps = new Array(mapNames.length)
 var allMapSpawns = []
 
 // Enumerators
+const Block = Object.freeze({'none':0, 'powerupTripleShot':1, 'powerupSpreadShot':2, 'powerupSpeedShot':3, 'powerupMine':4, 'solidBlock':5, 'weakBlock':6, 'tankSpawn': 7})
 const Collision = Object.freeze({'none':0, 'horizontal':1, 'vertical':2, 'both':3})
-const Special = Object.freeze({'none':0, 'triple':1, 'spread':2, 'speed':3, 'mine':4})
 
 // Global variables
 var games = {} // Key: gameCode, Value: game object
@@ -437,6 +437,16 @@ function sendPlayerNumber(client, playerNumber) {
 	}
 }
 
+function sendRemovePowerup(game, x, y) {
+	for (var i = 0; i < game.tanks.length; i++) {
+		var playerId = gamePlayerIds[game.code][i]
+		var client = clients[playerId]
+		if (client.readyState === WebSocket.OPEN) {
+			client.send(JSON.stringify({'removePowerup': 0, 'x': x, 'y': y}))
+		}
+	}
+}
+
 var server = app.listen(port, () => {
 	console.log(`HTTP server running on http://localhost:${port}`)
 })
@@ -594,14 +604,17 @@ wss.on('connection', function connection(newClient) {
 					// Set the tank control state
 					if (playerI >= 0) {
 						var tank = game.tanks[playerI]
-						tank.controlState = data.controlState
+						if (tank.alive) {
+							// Move
+							tank.controlState = data.controlState
 
-						// Shoot or drop mine
-						if (tank.controlState.leftClick) {
-							tank.shoot()
-						}
-						if (tank.controlState.rightClick) {
-							tank.mine()
+							// Shoot or drop mine
+							if (tank.controlState.leftClick) {
+								tank.shoot()
+							}
+							if (tank.controlState.rightClick) {
+								tank.mine()
+							}
 						}
 					}
 					else {
@@ -652,6 +665,8 @@ function updateGames() {
 						dx = -dx
 						dy = -dy
 					}
+
+					// Wall
 					var collisionType = tankWallCollision(game.mapI, tank.x, tank.y, dx, dy)
 					if (collisionType == Collision.none) {
 						tank.x += dx
@@ -662,6 +677,19 @@ function updateGames() {
 					}
 					else if (collisionType == Collision.vertical) {
 						tank.y += dy
+					}
+
+					// Powerup
+					var roundedX = Math.round(tank.x)
+					var roundedY = Math.round(tank.y)
+					for (var i = 0; i < game.powerups.length; i++) {
+						var powerup = game.powerups[i]
+						if (roundedX == powerup.x && roundedY == powerup.y) {
+							tank.specialType = powerup.type
+							game.powerups.splice(i, 1)
+							sendRemovePowerup(game, roundedX, roundedY)
+							break
+						}
 					}
 				}
 				calculateBarrelAngle(tank)

@@ -109,6 +109,14 @@ socket.onmessage = function receive(event) {
 	else if ('playerNumber' in data) {
 		playerNumber = data.playerNumber;
 	}
+	// Removing a powerup
+	else if ('removePowerup' in data) {
+		var map = document.getElementById('map');
+		var x = data.x;
+		var y = data.y;
+
+		map.childNodes[y].childNodes[x].className = '';
+	}
 	// Error
 	else if ('error' in data) {
 		if (currentScreen == 'hostScreen' || currentScreen == 'joinScreen') {
