@@ -1,7 +1,7 @@
 # Tanklash
 
-<img src="screenshots/start.png" alt="Start Screen" width="49%"/>
-<img src="screenshots/gameplay.png" alt="Start Screen" width="49%"/>
+![Start Screen](screenshots/start.png)
+![Gameplay](screenshots/gameplay.png)
 
 ## Play
 
