@@ -17,6 +17,9 @@ const colors = [
 	'tankPink',
 ];
 
+// Enumerators
+const Block = Object.freeze({'none':0, 'block':1, 'powerupTripleShot':2, 'powerupSpreadShot':3, 'powerupSpeedShot':4, 'powerupMine':5, 'tankSpawn': 6})
+
 // Global variables
 var game = {};
 var currentScreen = 'startScreen'; // startScreen, hostOrJoinScreen, hostScreen, joinScreen, mapScreen, gameScreen
@@ -429,22 +432,9 @@ function loadMapPreviews() {
 				var block = document.createElement('td');
 				row.appendChild(block);
 
-				// Block
-				if (blockCode == 1) {
-					block.className = 'block';
-				}
-				// Powerup
-				else if (blockCode == 2) {
-					block.className = 'powerupTripleShot';
-				}
-				else if (blockCode == 3) {
-					block.className = 'powerupSpreadShot';
-				}
-				else if (blockCode == 4) {
-					block.className = 'powerupSpeedShot';
-				}
-				else if (blockCode == 5) {
-					block.className = 'powerupMine';
+				// Block or powerup
+				if (blockCode >= Block.none && blockCode <= Block.powerupMine) {
+					block.className = Object.entries(Block)[blockCode][0];
 				}
 			}
 		}
@@ -484,7 +474,7 @@ function loadGame() {
 			row.appendChild(block);
 
 			// Block
-			if (blockCode == 1) {
+			if (blockCode == Block.block) {
 				block.className = 'block';
 			}
 		}
@@ -497,17 +487,8 @@ function loadGame() {
 		var x = powerup.x;
 		var y = powerup.y;
 
-		if (type == 2) {
-			map.childNodes[y].childNodes[x].className = 'powerupTripleShot';
-		}
-		else if (type == 3) {
-			map.childNodes[y].childNodes[x].className = 'powerupSpreadShot';
-		}
-		else if (type == 4) {
-			map.childNodes[y].childNodes[x].className = 'powerupSpeedShot';
-		}
-		else if (type == 5) {
-			map.childNodes[y].childNodes[x].className = 'powerupMine';
+		if (type >= Block.powerupTripleShot && type <= Block.powerupMine) {
+			map.childNodes[y].childNodes[x].className = Object.entries(Block)[type][0];
 		}
 	}
 
@@ -613,6 +594,20 @@ function drawGameObjects() {
 		}
 		if (controlState.rightClick) {
 			controlState.rightClick = false;
+		}
+
+		// Draw ammo
+		var myTank = game.tanks[playerNumber];
+		var specialAmmoIcon = document.getElementById('specialAmmoIcon');
+		var specialAmmoText = document.getElementById('specialAmmoText');
+		if (myTank.specialType != Block.none) {
+			var specialAmmoString = Object.entries(Block)[myTank.specialType][0];
+			specialAmmoIcon.className = specialAmmoString;
+			specialAmmoText.innerHTML = myTank.specialAmmo;
+		}
+		else {
+			specialAmmoIcon.className = '';
+			specialAmmoText.innerHTML = '';
 		}
 
 		// Draw objects

@@ -22,7 +22,11 @@ const tankShotHitRadius = 0.5
 const shotSpawnDistance = 10
 
 const shotCount = 3
-const mineCount = 3
+
+const tripleShotCount = 9
+const spreadShotCount = 9
+const speedShotCount = 9
+const mineCount = 9
 
 const shotWait = 500
 const tripleShotwait = 250
@@ -39,7 +43,7 @@ var maps = new Array(mapNames.length)
 var allMapSpawns = []
 
 // Enumerators
-const Block = Object.freeze({'none':0, 'powerupTripleShot':1, 'powerupSpreadShot':2, 'powerupSpeedShot':3, 'powerupMine':4, 'solidBlock':5, 'weakBlock':6, 'tankSpawn': 7})
+const Block = Object.freeze({'none':0, 'block':1, 'powerupTripleShot':2, 'powerupSpreadShot':3, 'powerupSpeedShot':4, 'powerupMine':5, 'tankSpawn': 6})
 const Collision = Object.freeze({'none':0, 'horizontal':1, 'vertical':2, 'both':3})
 
 // Global variables
@@ -156,7 +160,7 @@ class Tank {
 		this.timeLastMine = 0
 
 		this.specialAmmo = 0
-		this.specialType = Special.none
+		this.specialType = Block.none
 
 		for (var i = 0; i < this.shots.length; i++) {
 			this.shots[i].alive = false
@@ -180,6 +184,23 @@ class Tank {
 
 	mine() {
 
+	}
+
+	getPowerup(specialType) {
+		this.specialType = specialType
+
+		if (specialType == Block.powerupTripleShot) {
+			this.specialAmmo = tripleShotCount
+		}
+		else if (specialType == Block.powerupSpreadShot) {
+			this.specialAmmo = spreadShotCount
+		}
+		else if (specialType == Block.powerupSpeedShot) {
+			this.specialAmmo = speedShotCount
+		}
+		else if (specialType == Block.powerupMine) {
+			this.specialAmmo = mineCount
+		}
 	}
 }
 class Game {
@@ -281,7 +302,7 @@ function parseMap(mapName, i) {
 		var line = line.split(' ')
 		for (var x = 0; x < line.length; x++) {
 			line[x] = parseInt(line[x])
-			if (line[x] == 6) {
+			if (line[x] == Block.tankSpawn) {
 				mapSpawns.push([x, y])
 			}
 		}
@@ -332,10 +353,10 @@ function tankWallCollision(mapI, oldX, oldY, dX, dY) {
 	var newX = oldX + dX
 	var newY = oldY + dY
 
-	var tlWall = maps[mapI][Math.floor(newY)][Math.floor(newX)] == 1
-	var trWall = maps[mapI][Math.floor(newY)][Math.floor(newX+1)] == 1
-	var blWall = maps[mapI][Math.floor(newY+1)][Math.floor(newX)] == 1
-	var brWall = maps[mapI][Math.floor(newY+1)][Math.floor(newX+1)] == 1
+	var tlWall = maps[mapI][Math.floor(newY)][Math.floor(newX)] == Block.block
+	var trWall = maps[mapI][Math.floor(newY)][Math.floor(newX+1)] == Block.block
+	var blWall = maps[mapI][Math.floor(newY+1)][Math.floor(newX)] == Block.block
+	var brWall = maps[mapI][Math.floor(newY+1)][Math.floor(newX+1)] == Block.block
 
 	var eitherT = (oldY > Math.floor(newY+1)) && (tlWall || trWall) && !(blWall ||brWall)
 	var eitherB = (oldY < Math.floor(newY)) && (blWall || brWall) && !(tlWall || trWall)
@@ -377,12 +398,12 @@ function shotWallCollision(mapI, oldX, oldY, dx, dy) {
 		newYFloor = yMax
 	}
 
-	if (maps[mapI][newYFloor][newXFloor] != 1) {
+	if (maps[mapI][newYFloor][newXFloor] != Block.block) {
 		return Collision.none
 	}
 	else {
 		var oldYFloor = Math.floor(oldY + 0.5)
-		if (maps[mapI][oldYFloor][newXFloor] != 1) {
+		if (maps[mapI][oldYFloor][newXFloor] != Block.block) {
 			return Collision.horizontal
 		}
 		else {
@@ -685,7 +706,7 @@ function updateGames() {
 					for (var i = 0; i < game.powerups.length; i++) {
 						var powerup = game.powerups[i]
 						if (roundedX == powerup.x && roundedY == powerup.y) {
-							tank.specialType = powerup.type
+							tank.getPowerup(powerup.type)
 							game.powerups.splice(i, 1)
 							sendRemovePowerup(game, roundedX, roundedY)
 							break

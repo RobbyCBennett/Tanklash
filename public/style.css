@@ -419,6 +419,22 @@ button#start {
     left: 50%;
     transform: translateX(-50%);
 }
+#specialAmmo {
+	position: absolute;
+	bottom: 2rem;
+	right: 2rem;
+	display: flex;
+    align-items: center;
+	z-index: 1;
+}
+#specialAmmoText {
+	font-size: 1.5rem;
+}
+#specialAmmoIcon {
+	width: 2rem;
+	height: 2rem;
+	margin-left: 1rem;
+}
 table, tbody, tr, td {
 	padding: 0;
 	margin: 0;
@@ -437,16 +453,16 @@ td {
 .jungle td.block {
 	background: var(--gray);
 }
-td.powerupTripleShot {
+.powerupTripleShot {
 	background-image: url('art/powerupTripleShot.svg');
 }
-td.powerupSpreadShot {
+.powerupSpreadShot {
 	background-image: url('art/powerupSpreadShot.svg');
 }
-td.powerupSpeedShot {
+.powerupSpeedShot {
 	background-image: url('art/powerupSpeedShot.svg');
 }
-td.powerupMine {
+.powerupMine {
 	background-image: url('art/powerupMine.svg');
 }
 .gameTank {
