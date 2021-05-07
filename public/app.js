@@ -1,5 +1,5 @@
-// const host = 'wss://tanklash.herokuapp.com'; // live
-const host = 'ws://localhost:8080'; // local
+const host = 'wss://tanklash.herokuapp.com'; // live
+// const host = 'ws://localhost:8080'; // local
 
 var socket = new WebSocket(host);
 
