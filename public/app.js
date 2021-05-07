@@ -45,6 +45,44 @@ var controlState = {
 }
 var angleBarrel = 0;
 
+// Helper functions
+function randomRange(min, max) {
+    return Math.random() * (max - min) + min
+}
+
+function randomInList(list) {
+	return list[Math.floor(Math.random() * list.length)]
+}
+
+function playSound(sound) {
+	const lowestPitch = 0.5;
+	const highestPitch = 1.75;
+
+	var copied = sound.cloneNode();
+	copied.volume = sound.volume;
+	copied.preservesPitch = false;
+	copied.playbackRate = randomRange(lowestPitch, highestPitch);
+	copied.play();
+}
+
+// Setup audio
+function loadSounds(soundNames, sounds, volume) {
+	for (name of soundNames) {
+		sound = new Audio('sounds/' + name + '.wav');
+		sound.volume = volume;
+	    sounds.push(sound);
+	}
+}
+const shotSoundNames = ['shot1', 'shot2'];
+var shotSounds = [];
+const tankExplosionSoundNames = ['explosion1', 'explosion2', 'explosion3'];
+var tankExplosionSounds = [];
+const shotExplosionSoundNames = ['explosion1', 'explosion2', 'explosion3'];
+var shotExplosionSounds = [];
+loadSounds(shotSoundNames, shotSounds, 0.05);
+loadSounds(tankExplosionSoundNames, tankExplosionSounds, 0.25);
+loadSounds(shotExplosionSoundNames, shotExplosionSounds, 0.025);
+
 // Disable right clicking in the game
 document.getElementById('gameScreen').addEventListener('contextmenu', event => event.preventDefault());
 
@@ -626,6 +664,7 @@ function drawGameObjects() {
 				tankDiv.classList.remove('explosion');
 			}
 			else if (!tankDiv.classList.contains('explosion')) {
+				playSound(randomInList(tankExplosionSounds));
 				tankDiv.classList.add('explosion');
 			}
 
@@ -636,9 +675,13 @@ function drawGameObjects() {
 				var shotDiv = shotDivs[i * tank.shots.length + j];
 				if (shot.alive) {
 					shotDiv.style = 'transform: translate(' + shot.x*100 + '%, ' + shot.y*100 + '%)';
-					shotDiv.classList.remove('hidden');
+					if (shotDiv.classList.contains('hidden')) {
+						playSound(randomInList(shotSounds));
+						shotDiv.classList.remove('hidden');
+					}
 				}
 				else if (!shotDiv.classList.contains('hidden')) {
+					playSound(randomInList(shotExplosionSounds));
 					shotDiv.classList.add('hidden');
 
 					explosion = document.createElement('div');
