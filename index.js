@@ -35,7 +35,7 @@ const mineWait = 1000
 const shotSpeed = 0.05
 const fastShotMultiplier = 1.5
 
-const spreadShotAngle = 22.5
+const spreadShotAngle = 15
 
 const tankSpeed = 0.025
 const tankRotateSpeed = 1
@@ -426,10 +426,6 @@ function parseAllMaps() {
 }
 parseAllMaps()
 
-function validateClient(client, playerId) {
-	return client == clients[playerId]
-}
-
 function getPlayerI(playerId, gameCode) {
 	var playerI = -1
 	var playerIds = gamePlayerIds[gameCode]
@@ -748,6 +744,60 @@ wss.on('connection', function connection(newClient) {
 				}
 				else {
 					newClient.send(JSON.stringify({'error': 'Game is not in progress: ' + data.code}))
+				}
+			}
+			else {
+				newClient.send(JSON.stringify({'error': 'Game code is invalid: ' + data.code}))
+			}
+		}
+
+		else if ('newName' in data) {
+			if (data.code in games) {
+				// Find game
+				var game = games[data.code]
+
+				if (game.screen != 'gameScreen') {
+					// Find player in game
+					var playerI = getPlayerI(newPlayerId, game.code)
+
+					// Set the tank name
+					if (playerI >= 0) {
+						var tank = game.tanks[playerI]
+						// console.log(data.newName)
+						// console.log(data.newName.length)
+						if (data.newName.length > 0) {
+							tank.name = data.newName
+							sendGameToPlayers(game)
+						}
+					}
+				}
+				else {
+					newClient.send(JSON.stringify({'error': 'Game is in progress. Can\'t change name.'}))
+				}
+			}
+			else {
+				newClient.send(JSON.stringify({'error': 'Game code is invalid: ' + data.code}))
+			}
+		}
+
+		else if ('newColor' in data) {
+			if (data.code in games) {
+				// Find game
+				var game = games[data.code]
+
+				if (game.screen != 'gameScreen') {
+					// Find player in game
+					var playerI = getPlayerI(newPlayerId, game.code)
+
+					// Set the tank color
+					if (playerI >= 0) {
+						var tank = game.tanks[playerI]
+						tank.color = data.newColor
+						sendGameToPlayers(game)
+					}
+				}
+				else {
+					newClient.send(JSON.stringify({'error': 'Game is in progress. Can\'t change color.'}))
 				}
 			}
 			else {

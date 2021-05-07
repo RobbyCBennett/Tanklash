@@ -25,6 +25,5 @@ Pick a tank color and destroy your friends! Inspired by the Nintendo Wii game "T
 
 ## Possible Future Development
 
-* Powerups
 * Accounts
 * Custom Maps

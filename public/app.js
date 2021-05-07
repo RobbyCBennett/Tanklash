@@ -202,7 +202,7 @@ function copyCode() {
 function savePlayerName(name) {
 	localStorage.setItem('name', name);
 	currentName = name;
-	send({'newName': name});
+	send({'newName': name, 'code': currentGameCode});
 	updatePlayerList();
 }
 
@@ -217,7 +217,7 @@ function savePlayerColor(currentColor) {
 			document.getElementById('editPlayerColor').className = newColor;
 			document.getElementById('editPlayerColorBig').className = newColor;
 			localStorage.setItem('color', newColor);
-			send({'newColor': newColor});
+			send({'newColor': newColor, 'code': currentGameCode});
 			updatePlayerList();
 			break;
 		}
