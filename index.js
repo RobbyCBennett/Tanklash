@@ -29,11 +29,13 @@ const speedShotCount = 9
 const mineCount = 9
 
 const shotWait = 500
-const tripleShotwait = 250
+const tripleShotWait = 250
 const mineWait = 1000
 
 const shotSpeed = 0.05
-const fastShotMultiplier = 2
+const fastShotMultiplier = 1.5
+
+const spreadShotAngle = 22.5
 
 const tankSpeed = 0.025
 const tankRotateSpeed = 1
@@ -182,25 +184,127 @@ class Tank {
 		}
 	}
 
-	mine() {
+	specialShoot() {
+		if (this.specialAmmo > 0) {
+			var now = Date.now()
 
+			if (this.specialType == Block.powerupTripleShot) {
+				if ((now >= this.timeLastShot + shotWait)) {
+					var allThreeShotsAvailable = true
+					for (var i = 0; i < this.shots.length; i++) {
+						var shot = this.shots[i]
+						if (shot.alive == true) {
+							allThreeShotsAvailable = false
+							break
+						}
+					}
+					if (allThreeShotsAvailable) {
+						let tripleShoot = () => {
+							for (var i = 0; i < this.shots.length; i++) {
+								var shot = this.shots[i]
+								if (shot.alive == false) {
+									shot.spawn(this.x, this.y, this.angleBarrel, false)
+									this.timeLastShot = Date.now()
+									this.specialAmmo -= 1
+									break
+								}
+							}
+
+							if (this.specialAmmo % 3 == 0) {
+								clearInterval(interval)
+							}
+						}
+						tripleShoot()
+						var interval = setInterval(tripleShoot, tripleShotWait)
+					}
+				}
+			}
+			else if (this.specialType == Block.powerupSpreadShot) {
+				if (now >= this.timeLastShot + shotWait) {
+					var allThreeShotsAvailable = true
+					for (var i = 0; i < this.shots.length; i++) {
+						var shot = this.shots[i]
+						if (shot.alive == true) {
+							allThreeShotsAvailable = false
+							break
+						}
+					}
+					if (allThreeShotsAvailable) {
+						for (var i = 0; i < this.shots.length; i++) {
+							var shot = this.shots[i]
+							if (shot.alive == false) {
+								var angle = this.angleBarrel
+								if (this.specialAmmo % 3 == 1) {
+									angle += spreadShotAngle
+								}
+								if (this.specialAmmo % 3 == 2) {
+									angle -= spreadShotAngle
+								}
+								shot.spawn(this.x, this.y, angle, false)
+								this.specialAmmo -= 1
+								this.timeLastShot = now
+								if (this.specialAmmo % 3 == 0) {
+									break
+								}
+							}
+						}
+					}
+				}
+			}
+			else if (this.specialType == Block.powerupSpeedShot) {
+				if (now >= this.timeLastShot + shotWait) {
+					for (var i = 0; i < this.shots.length; i++) {
+						var shot = this.shots[i]
+						if (shot.alive == false) {
+							shot.spawn(this.x, this.y, this.angleBarrel, true)
+							this.specialAmmo -= 1
+							this.timeLastShot = now
+							break
+						}
+					}
+				}
+			}
+			else if (this.specialType == Block.powerupMine) {
+
+			}
+		}
 	}
 
 	getPowerup(specialType) {
-		this.specialType = specialType
-
 		if (specialType == Block.powerupTripleShot) {
-			this.specialAmmo = tripleShotCount
+			if (this.specialType == specialType) {
+				this.specialAmmo += tripleShotCount
+			}
+			else {
+				this.specialAmmo = tripleShotCount
+			}
 		}
 		else if (specialType == Block.powerupSpreadShot) {
-			this.specialAmmo = spreadShotCount
+			if (this.specialType == specialType) {
+				this.specialAmmo += spreadShotCount
+			}
+			else {
+				this.specialAmmo = spreadShotCount
+			}
 		}
 		else if (specialType == Block.powerupSpeedShot) {
-			this.specialAmmo = speedShotCount
+			if (this.specialType == specialType) {
+				this.specialAmmo += speedShotCount
+			}
+			else {
+				this.specialAmmo = speedShotCount
+			}
 		}
 		else if (specialType == Block.powerupMine) {
-			this.specialAmmo = mineCount
+			if (this.specialType == specialType) {
+				this.specialAmmo += mineCount
+			}
+			else {
+				this.specialAmmo = mineCount
+			}
 		}
+
+		this.specialType = specialType
 	}
 }
 class Game {
@@ -634,7 +738,7 @@ wss.on('connection', function connection(newClient) {
 								tank.shoot()
 							}
 							if (tank.controlState.rightClick) {
-								tank.mine()
+								tank.specialShoot()
 							}
 						}
 					}
