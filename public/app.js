@@ -600,7 +600,7 @@ function drawGameObjects() {
 		var myTank = game.tanks[playerNumber];
 		var specialAmmoIcon = document.getElementById('specialAmmoIcon');
 		var specialAmmoText = document.getElementById('specialAmmoText');
-		if (myTank.specialType != Block.none) {
+		if (myTank.specialType != Block.none && myTank.specialAmmo > 0) {
 			var specialAmmoString = Object.entries(Block)[myTank.specialType][0];
 			specialAmmoIcon.className = specialAmmoString;
 			specialAmmoText.innerHTML = myTank.specialAmmo;
