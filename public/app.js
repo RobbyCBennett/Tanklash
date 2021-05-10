@@ -1,5 +1,6 @@
 const host = 'wss://tanklash.herokuapp.com'; // live
 // const host = 'ws://localhost:8080'; // local
+// const host = 'ws://192.168.0.154:8080'; // lan
 
 var socket = new WebSocket(host);
 
@@ -42,6 +43,8 @@ var controlState = {
 	mouseY: 0,
 	leftClick: false,
 	rightClick: false,
+	mobile: false,
+	bodyAngle: 0,
 }
 var angleBarrel = 0;
 
@@ -402,8 +405,40 @@ function changeScreen(nextScreen) {
 				else if (currentScreen == 'gameScreen') {
 					playerConfig.classList.add('hidden');
 				}
+
+				// Reset joystick and set screen size
+				if (nextScreen == 'gameScreen') {
+					if (navigator.maxTouchPoints > 0) {
+						var html = document.getElementsByTagName('html')[0];
+						html.classList.add('mobile');
+
+						setTimeout(function () {
+							centerStick();
+						}, 10);
+					}
+					else {
+						document.getElementById('mobileControls').classList.add('hidden')
+					}
+				}
+				else if (nextScreen == 'mapScreen') {
+					var html = document.getElementsByTagName('html')[0];
+					html.classList.remove('mobile');
+				}
 			}, secondsToWait * 1000);
 		}
+	}
+}
+
+if (navigator.maxTouchPoints > 0) {
+	document.getElementById('startHint').innerHTML = 'Touch anywhere but the tank'
+}
+function startScreen(event) {
+	if (event.target.id != 'editPlayerColorBig') {
+		if (navigator.maxTouchPoints > 0) {
+			document.body.requestFullscreen({ navigationUI: 'hide' });
+			screen.orientation.lock('landscape');
+		}
+		changeScreen('hostOrJoinScreen');
 	}
 }
 
@@ -722,7 +757,7 @@ setInterval(function () {
 }, 30 * 1000);
 
 // Game mouse controls
-document.onmousemove = function setMousePosition(event) {
+function setMousePosition(event) {
 	if (currentScreen == 'gameScreen') {
 		var mapBox = document.getElementById('map').getBoundingClientRect();
 
@@ -734,8 +769,8 @@ document.onmousemove = function setMousePosition(event) {
 		var xRatio = (event.clientX - left) / (right - left);
 		var yRatio = (event.clientY - top) / (bottom - top);
 
-		var width = maps[game.mapI][0].length
-		var height = maps[game.mapI].length
+		var width = maps[game.mapI][0].length;
+		var height = maps[game.mapI].length;
 
 		var x = xRatio * width;
 		var y = yRatio * height;
@@ -746,18 +781,96 @@ document.onmousemove = function setMousePosition(event) {
 		sendControlState();
 	}
 }
+// If desktop
+if (navigator.maxTouchPoints == 0) {
+	document.onmousemove = setMousePosition;
+}
 document.body.onmousedown = function (event) {
 	if (currentScreen == 'gameScreen') {
-		var leftClick = event.which == 1;
-		var rightClick = event.which == 3;
+		var targetId = event.target.id;
+		if (targetId != 'joystickArea' && targetId != 'joystickStick' && targetId != 'switchAmmo') {
+			var leftClick = event.which == 1;
+			var rightClick = event.which == 3;
 
-		if (leftClick || rightClick) {
-			controlState.leftClick = leftClick;
-			controlState.rightClick = rightClick;
+			if (leftClick || rightClick) {
+				controlState.leftClick = leftClick;
+				controlState.rightClick = rightClick;
+
+				setMousePosition(event);
+			}
+		}
+	}
+}
+
+// Touchscreen shoot controls
+document.body.ontouchstart = function (event) {
+	if (currentScreen == 'gameScreen') {
+		var targetId = event.target.id;
+		if (targetId != 'joystickArea' && targetId != 'joystickStick' && targetId != 'switchAmmo') {
+			if (event.touches.length > 1) {
+				controlState.leftClick = true;
+				setMousePosition(event.touches[1]);
+			}
+		}
+		else if (targetId == 'joystickArea') {
+			moveStick(event);
+		}
+	}
+}
+
+// Touchscreen joystick controls
+function moveStick(event) {
+	if (currentScreen == 'gameScreen') {
+		var targetId = event.target.id;
+		if (targetId == 'joystickArea' || targetId == 'joystickStick') {
+			var stickAreaBox = document.getElementById('joystickArea').getBoundingClientRect();
+			var stick = document.getElementById('joystickStick');
+
+			var stickDiameter = (stick.getBoundingClientRect().bottom - stick.getBoundingClientRect().top) / 2;
+			var centerX = stickAreaBox.x + stickAreaBox.width / 2 - stickDiameter;
+			var centerY = stickAreaBox.y + stickAreaBox.height / 2 - stickDiameter;
+			var x = event.touches[0].clientX - stickDiameter;
+			var y = event.touches[0].clientY - stickDiameter;
+
+			stick.style = 'transform: translate(' + x + 'px, ' + y + 'px)';
+
+			// Calculate angle
+			var dx = x - centerX;
+			var dy = y - centerY;
+			angleBody = Math.atan(dy / dx) / 3.141592 * 180;
+			if (dx < 0) {
+				angleBody += 180;
+			}
+			controlState.mobile = true;
+			controlState.up = true;
+			controlState.angleBody = angleBody;
 
 			sendControlState();
 		}
 	}
+}
+document.body.ontouchmove = moveStick;
+document.body.ontouchend = function (event) {
+	if (currentScreen == 'gameScreen') {
+		var targetId = event.target.id;
+		if (targetId == 'joystickArea' || targetId == 'joystickStick') {
+			centerStick();
+		}
+	}
+}
+function centerStick() {
+	var stickAreaBox = document.getElementById('joystickArea').getBoundingClientRect();
+	var stick = document.getElementById('joystickStick');
+
+	var stickDiameter = (stick.getBoundingClientRect().bottom - stick.getBoundingClientRect().top) / 2;
+	var centerX = stickAreaBox.x + stickAreaBox.width / 2 - stickDiameter;
+	var centerY = stickAreaBox.y + stickAreaBox.height / 2 - stickDiameter;
+
+	stick.style = 'transform: translate(' + centerX + 'px, ' + centerY + 'px)';
+
+	controlState.up = false;
+
+	sendControlState();
 }
 
 

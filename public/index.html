@@ -15,11 +15,11 @@
 			<button id='editPlayerColor' onclick='savePlayerColor(event.target.className)'></button>
 		</div>
 
-		<div id='startScreen' class='fullscreen centerBoth'>
+		<div id='startScreen' class='fullscreen centerBoth' onclick='startScreen(event)'>
 			<div class='center'>
 				<h1>Tanklash</h1>
 				<button id='editPlayerColorBig' onclick='savePlayerColor(event.target.className)'></button>
-				<p class='hint'>Press W, A, S, or D</p>
+				<p id='startHint' class='hint'>Press W, A, S, or D</p>
 			</div>
 		</div>
 
@@ -110,6 +110,17 @@
 		</div>
 
 		<div id='gameScreen' class='fullscreen centerBoth hidden'>
+			<div id='mobileControls'>
+				<div id='joystickStick'></div>
+				<div id='mobileControlsOther'>
+					<div>
+						<div id='joystickArea'></div>
+					</div>
+					<!-- <div>
+						<button id='switchAmmo'></button>
+					</div> -->
+				</div>
+			</div>
 			<div id='specialAmmo'>
 				<p id='specialAmmoText'></p>
 				<div id='specialAmmoIcon'></div>

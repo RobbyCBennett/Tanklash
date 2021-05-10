@@ -731,9 +731,11 @@ wss.on('connection', function connection(newClient) {
 
 							// Shoot or drop mine
 							if (tank.controlState.leftClick) {
+								calculateBarrelAngle(tank)
 								tank.shoot()
 							}
 							if (tank.controlState.rightClick) {
+								calculateBarrelAngle(tank)
 								tank.specialShoot()
 							}
 						}
@@ -763,8 +765,6 @@ wss.on('connection', function connection(newClient) {
 					// Set the tank name
 					if (playerI >= 0) {
 						var tank = game.tanks[playerI]
-						// console.log(data.newName)
-						// console.log(data.newName.length)
 						if (data.newName.length > 0) {
 							tank.name = data.newName
 							sendGameToPlayers(game)
@@ -808,31 +808,43 @@ wss.on('connection', function connection(newClient) {
 })
 
 function updateGames() {
+	var tacoSauce = {}
 	for (var [code, game] of Object.entries(games)) {
 		if (game.screen == 'gameScreen') {
 
 			for (var tankI = 0; tankI < game.tanks.length; tankI++) {
 				var tank = game.tanks[tankI]
 
+				// Mobile
+				if (tank.controlState.mobile) {
+					// Rotate tank
+					tank.angleBody = tank.controlState.angleBody;
+				}
+
+				// Desktop
+				else {
+					// Rotate tank
+					if (tank.controlState.left) {
+						tank.angleBody -= tankRotateSpeed
+						if (tank.angleBody < 0) {
+							tank.angleBody += 360
+						}
+						else if (tank.angleBody > 360) {
+							tank.angleBody -= 360
+						}
+					}
+					else if (tank.controlState.right) {
+						tank.angleBody += tankRotateSpeed
+						if (tank.angleBody < 0) {
+							tank.angleBody += 360
+						}
+						else if (tank.angleBody > 360) {
+							tank.angleBody -= 360
+						}
+					}
+				}
+
 				// Move tank
-				if (tank.controlState.left) {
-					tank.angleBody -= tankRotateSpeed
-					if (tank.angleBody < 0) {
-						tank.angleBody += 360
-					}
-					else if (tank.angleBody > 360) {
-						tank.angleBody -= 360
-					}
-				}
-				else if (tank.controlState.right) {
-					tank.angleBody += tankRotateSpeed
-					if (tank.angleBody < 0) {
-						tank.angleBody += 360
-					}
-					else if (tank.angleBody > 360) {
-						tank.angleBody -= 360
-					}
-				}
 				if (tank.controlState.up || tank.controlState.down) {
 					dx = tankSpeed * Math.cos(tank.angleBody / 180 * 3.141592)
 					dy = tankSpeed * Math.sin(tank.angleBody / 180 * 3.141592)
@@ -867,6 +879,7 @@ function updateGames() {
 						}
 					}
 				}
+
 				calculateBarrelAngle(tank)
 
 				// Move shots

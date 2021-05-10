@@ -20,6 +20,10 @@
     src: url('minecraft.otf') format('opentype');
 }
 
+html.mobile {
+	font-size: 0.5rem;
+}
+
 h1, h2, h3, h4, h5, h6 {
 	font-weight: normal;
 }
@@ -36,9 +40,11 @@ h1 {
 
 body {
 	color: white;
-	background-color: var(--dark);
 	margin: 0;
 	overflow: hidden;
+}
+body, #startScreen, #hostOrJoinScreen, #hostScreen, #joinScreen, #mapScreen {
+	background-color: var(--dark);
 }
 
 body, button, input {
@@ -47,6 +53,7 @@ body, button, input {
 
 button, input {
 	outline: none;
+	-webkit-tap-highlight-color: transparent;
 }
 
 input {
@@ -421,7 +428,7 @@ button#start {
 }
 #specialAmmo {
 	position: absolute;
-	bottom: 2rem;
+	top: 2rem;
 	right: 2rem;
 	display: flex;
     align-items: center;
@@ -564,6 +571,47 @@ td {
 	width: 0.25rem;
 	height: 0.25rem;
 	background-color: white;
+}
+
+/* Mobile Controls */
+#mobileControls {
+	position: absolute;
+	width: 100vw;
+	height: 100vh;
+	top: 0;
+	left: 0;
+	z-index: 1;
+}
+#mobileControlsOther {
+	position: absolute;
+	bottom: 0;
+	width: calc(100vw - 4rem);
+	padding: 2rem;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+}
+#joystickArea, #joystickStick, #switchAmmo {
+	color: rgba(255, 255, 255, 0.125);
+	border: 2px solid rgba(255, 255, 255, 0.125);
+	border-radius: 50%;
+	background: transparent;
+}
+#joystickArea {
+	width: 20rem;
+	height: 20rem;
+}
+#joystickStick {
+	width: 2rem;
+	height: 2rem;
+	position: absolute;
+}
+#switchAmmo {
+	width: 10rem;
+	height: 10rem;
+}
+#switchAmmo:active {
+	background: rgba(255, 255, 255, 0.125);
 }
 
 /* 3 Map Columns */
