@@ -610,7 +610,7 @@ td {
 	width: 10rem;
 	height: 10rem;
 }
-#switchAmmo:active {
+#switchAmmo:active, #switchAmmo.active {
 	background: rgba(255, 255, 255, 0.125);
 }
 

@@ -846,6 +846,9 @@ function updateGames() {
 
 				// Move tank
 				if (tank.controlState.up || tank.controlState.down) {
+					if (tank.angleBody == undefined) {
+						tank.angleBody = 0;
+					}
 					dx = tankSpeed * Math.cos(tank.angleBody / 180 * 3.141592)
 					dy = tankSpeed * Math.sin(tank.angleBody / 180 * 3.141592)
 					if (tank.controlState.down) {

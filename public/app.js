@@ -46,6 +46,7 @@ var controlState = {
 	mobile: false,
 	bodyAngle: 0,
 }
+var ammoSpecial = false;
 var angleBarrel = 0;
 
 // Helper functions
@@ -99,6 +100,20 @@ socket.onmessage = function receive(event) {
 
 	// Game objects
 	if ('gameData' in data) {
+		// Update left/right click for mobile
+		if ('tanks' in game) {
+			var myOldTank = game.tanks[playerNumber];
+			var myNewTank = data.gameData.tanks[playerNumber];
+			// console.log(myOldTank.specialAmmo);
+			// console.log(myNewTank.specialAmmo);
+			if (myOldTank.specialAmmo == 0 && myNewTank.specialAmmo > 0) {
+				switchAmmo(true);
+			}
+			else if (myOldTank.specialAmmo > 0 && myNewTank.specialAmmo == 0) {
+				switchAmmo(false);
+			}
+		}
+
 		// Update game
 		game = data.gameData;
 
@@ -258,7 +273,9 @@ function savePlayerColor(currentColor) {
 			document.getElementById('editPlayerColor').className = newColor;
 			document.getElementById('editPlayerColorBig').className = newColor;
 			localStorage.setItem('color', newColor);
-			send({'newColor': newColor, 'code': currentGameCode});
+			if (currentGameCode) {
+				send({'newColor': newColor, 'code': currentGameCode});
+			}
 			updatePlayerList();
 			break;
 		}
@@ -793,8 +810,18 @@ document.body.onmousedown = function (event) {
 			var rightClick = event.which == 3;
 
 			if (leftClick || rightClick) {
-				controlState.leftClick = leftClick;
-				controlState.rightClick = rightClick;
+				if (controlState.mobile) {
+					if (ammoSpecial) {
+						controlState.rightClick = true;
+					}
+					else {
+						controlState.leftClick = true;
+					}
+				}
+				else {
+					controlState.leftClick = leftClick;
+					controlState.rightClick = rightClick;
+				}
 
 				setMousePosition(event);
 			}
@@ -808,13 +835,43 @@ document.body.ontouchstart = function (event) {
 		var targetId = event.target.id;
 		if (targetId != 'joystickArea' && targetId != 'joystickStick' && targetId != 'switchAmmo') {
 			if (event.touches.length > 1) {
-				controlState.leftClick = true;
+				if (ammoSpecial) {
+					controlState.rightClick = true;
+				}
+				else {
+					controlState.leftClick = true;
+				}
 				setMousePosition(event.touches[1]);
 			}
 		}
 		else if (targetId == 'joystickArea') {
 			moveStick(event);
 		}
+		else if (targetId == 'switchAmmo') {
+			requestSwitchAmmo();
+			event.target.classList.add('active');
+		}
+	}
+}
+
+// Touchscreen ammo switch controls
+function switchAmmo(special) {
+	ammoSpecial = special;
+	if (special) {
+		document.getElementById('switchAmmo').innerHTML = 'SPECIAL';
+	}
+	else {
+		document.getElementById('switchAmmo').innerHTML = 'NORMAL';
+	}
+}
+function requestSwitchAmmo() {
+	var myTank = game.tanks[playerNumber];
+
+	if (!ammoSpecial && myTank.specialAmmo > 0) {
+		switchAmmo(true);
+	}
+	else {
+		switchAmmo(false);
 	}
 }
 
@@ -837,11 +894,14 @@ function moveStick(event) {
 			// Calculate angle
 			var dx = x - centerX;
 			var dy = y - centerY;
+			if (dx == 0) {
+				dx = 1;
+			}
 			angleBody = Math.atan(dy / dx) / 3.141592 * 180;
 			if (dx < 0) {
 				angleBody += 180;
 			}
-			controlState.mobile = true;
+
 			controlState.up = true;
 			controlState.angleBody = angleBody;
 
@@ -856,6 +916,9 @@ document.body.ontouchend = function (event) {
 		if (targetId == 'joystickArea' || targetId == 'joystickStick') {
 			centerStick();
 		}
+		else if (targetId == 'switchAmmo') {
+			event.target.classList.remove('active');
+		}
 	}
 }
 function centerStick() {
@@ -868,6 +931,7 @@ function centerStick() {
 
 	stick.style = 'transform: translate(' + centerX + 'px, ' + centerY + 'px)';
 
+	controlState.mobile = true;
 	controlState.up = false;
 
 	sendControlState();
