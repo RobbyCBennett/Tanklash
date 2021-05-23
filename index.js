@@ -520,7 +520,7 @@ function shotTankCollision(mapI, shotX, shotY, tanks) {
 		var dy = shotY - tank.y
 		var distanceToTank = Math.sqrt(dx * dx + dy * dy)
 
-		if (distanceToTank <= tankShotHitRadius) {
+		if (distanceToTank <= tankShotHitRadius && tank.alive) {
 			tank.alive = false
 			return true
 		}
