@@ -5,7 +5,7 @@
 
 ## Play
 
-https://tanklash.herokuapp.com
+https://tanklash.herokuapp.com (If you are the only user, it will take a while to load at first. It's a free Heroku deployment.)
 
 ## Introduction
 
